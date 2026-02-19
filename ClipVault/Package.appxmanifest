@@ -11,7 +11,6 @@
   <Properties>
     <DisplayName>ClipVault</DisplayName>
     <PublisherDisplayName>ClipVault Developer</PublisherDisplayName>
-    <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -28,13 +27,9 @@
                  Executable="$targetnametoken$.exe"
                  EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="ClipVault - Clipboard Manager"
+        DisplayName="ClipVault"
         Description="Smart Clipboard Manager"
-        BackgroundColor="transparent"
-        Square150x150Logo="Images\Square150x150Logo.png"
-        Square44x44Logo="Images\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
-        <uap:SplashScreen Image="Images\SplashScreen.png" />
+        BackgroundColor="transparent">
       </uap:VisualElements>
     </Application>
   </Applications>

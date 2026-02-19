@@ -8,6 +8,7 @@ using ClipVault.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml; // For ElementSoundPlayer
 
 namespace ClipVault.ViewModels
 {
@@ -28,12 +29,11 @@ namespace ClipVault.ViewModels
         private bool _isPremium;
 
         [ObservableProperty]
-        private bool _isPinnedFilter; // If true, only show pinned
+        private bool _isPinnedFilter;
 
         [ObservableProperty]
         private bool _isBusy;
 
-        // Use this flag to stop listening temporarily if needed
         private bool _handleUpdates = true;
 
         public MainViewModel()
@@ -44,12 +44,14 @@ namespace ClipVault.ViewModels
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             Items = new ObservableCollection<ClipboardItem>();
-            LoadItemsAsync(); // Fire and forget (it handles failures)
+            LoadItemsAsync();
 
             _clipboardService.ClipboardChanged += OnClipboardChanged;
             _storeService.PremiumStatusChanged += (s, isPremium) => IsPremium = isPremium;
-
             IsPremium = _storeService.IsPremium;
+
+            // Enable global sounds
+            ElementSoundPlayer.State = ElementSoundPlayerState.On;
         }
 
         public async void LoadItemsAsync(bool forceReload = false)
@@ -59,7 +61,6 @@ namespace ClipVault.ViewModels
             IsBusy = true;
             try
             {
-                // Run DB query on background thread
                 var loadedItems = await Task.Run(() =>
                 {
                     var allItems = _databaseService.GetItems(IsPremium);
@@ -78,7 +79,6 @@ namespace ClipVault.ViewModels
                     return filtered;
                 });
 
-                // Update UI thread
                 Items.Clear();
                 foreach (var item in loadedItems)
                 {
@@ -98,24 +98,15 @@ namespace ClipVault.ViewModels
         private void OnClipboardChanged(object sender, string text)
         {
             if (!_handleUpdates) return;
-
-            // Avoid loops - check most recent
             if (Items.Count > 0 && Items[0].Content == text) return;
 
-            // Run logic on background thread then post to UI
             Task.Run(() =>
             {
-                _databaseService.AddItem(text); // Add to DB
-
+                _databaseService.AddItem(text);
                 _dispatcherQueue.TryEnqueue(() =>
                 {
-                    // Only reload if we are not filtering/searching
-                    // or if the new item matches current filter
                     if (string.IsNullOrEmpty(SearchText) && !IsPinnedFilter)
                     {
-                        // Optimization: Instead of reloading everything, just validly insert at top
-                        // But getting ID is tricky without reloading unless AddItem returns ID.
-                        // For simplicity and correctness, reload list but quickly.
                         LoadItemsAsync(true);
                     }
                 });
@@ -132,16 +123,33 @@ namespace ClipVault.ViewModels
         private void CopyItem(ClipboardItem item)
         {
             if (item == null) return;
-            _handleUpdates = false; // Don't trigger recursive loop
+            _handleUpdates = false;
             try
             {
                 _clipboardService.SetContent(item.Content);
+                PlaySound(ElementSoundKind.Invoke);
             }
             finally
             {
-                // Re-enable after short delay to skip own event
                 Task.Delay(500).ContinueWith(_ => _handleUpdates = true);
             }
+        }
+
+        [RelayCommand]
+        private async Task ClearAll()
+        {
+            // Simple logic: Clear based on current view
+            IsBusy = true;
+            await Task.Run(() =>
+            {
+                _databaseService.ClearAll(IsPinnedFilter);
+            });
+
+            // Refresh UI
+            LoadItemsAsync(true);
+
+            IsBusy = false;
+            PlaySound(ElementSoundKind.Hide);
         }
 
         [RelayCommand]
@@ -149,18 +157,17 @@ namespace ClipVault.ViewModels
         {
             if (item == null) return;
 
-            // Toggle local object state for immediate feedback
             bool newPinState = !item.IsPinned;
-            item.IsPinned = newPinState; // UI updates via INotifyPropertyChanged
+            item.IsPinned = newPinState;
 
-            // Update DB
             Task.Run(() => _databaseService.TogglePin(item.Id, newPinState));
 
-            // If we are showing only Pinned items, we might want to remove it from view if unpinned
             if (IsPinnedFilter && !newPinState)
             {
                 Items.Remove(item);
             }
+
+            PlaySound(newPinState ? ElementSoundKind.Show : ElementSoundKind.Hide);
         }
 
         [RelayCommand]
@@ -170,6 +177,7 @@ namespace ClipVault.ViewModels
 
             Task.Run(() => _databaseService.DeleteItem(item.Id));
             Items.Remove(item);
+            PlaySound(ElementSoundKind.Hide);
         }
 
         [RelayCommand]
@@ -186,7 +194,17 @@ namespace ClipVault.ViewModels
             {
                 IsPremium = true;
                 RefreshItems();
+                PlaySound(ElementSoundKind.Show);
             }
+        }
+
+        private void PlaySound(ElementSoundKind sound)
+        {
+            try
+            {
+                ElementSoundPlayer.Play(sound);
+            }
+            catch { }
         }
     }
 }

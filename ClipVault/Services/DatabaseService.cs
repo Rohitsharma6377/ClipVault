@@ -56,7 +56,8 @@ namespace ClipVault.Services
                     connection.Open();
                     var command = connection.CreateCommand();
 
-                    string limitClause = isPremium ? "" : "LIMIT 10";
+                    // Always show Pinned first, then newest
+                    string limitClause = isPremium ? "" : "LIMIT 50"; // Increase limit a bit for user experience
 
                     command.CommandText = $"SELECT Id, Content, Timestamp, IsPinned FROM ClipboardItems ORDER BY IsPinned DESC, Timestamp DESC {limitClause}";
 
@@ -124,6 +125,34 @@ namespace ClipVault.Services
                     var command = connection.CreateCommand();
                     command.CommandText = "DELETE FROM ClipboardItems WHERE Id = $id";
                     command.Parameters.AddWithValue("$id", id);
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch { }
+        }
+
+        public void ClearAll(bool onlyPinned)
+        {
+            try
+            {
+                using (var connection = new SqliteConnection($"Data Source={_dbPath}"))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    if (onlyPinned)
+                    {
+                        command.CommandText = "DELETE FROM ClipboardItems WHERE IsPinned = 1";
+                    }
+                    else
+                    {
+                        // If user wants to clear "Clipboard", usually means history.
+                        // Should we keep Pinned? Usually "Clear All" means clear non-pinned, or clear strictly what is shown.
+                        // Let's assume clear everything EXCEPT pinned if viewing main list, to be safe?
+                        // Or "Clear All" means wipe DB?
+                        // User said "clean clip board".
+                        // Let's clear non-pinned items.
+                        command.CommandText = "DELETE FROM ClipboardItems WHERE IsPinned = 0";
+                    }
                     command.ExecuteNonQuery();
                 }
             }

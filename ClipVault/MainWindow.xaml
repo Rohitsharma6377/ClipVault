@@ -2,10 +2,7 @@
     x:Class="ClipVault.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:ClipVault"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    xmlns:local="using:ClipVault">
     
     <Grid>
         <Grid.RowDefinitions>
@@ -13,9 +10,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Custom TitleBar -->
+        <!-- Custom TitleBar with Logo -->
         <Grid x:Name="AppTitleBar" Height="32">
-            <TextBlock Text="ClipVault" VerticalAlignment="Center" Margin="16,0,0,0" FontWeight="SemiBold"/>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0" Spacing="8">
+                <!-- Icon as Logo -->
+                <FontIcon Glyph="&#xE77F;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{ThemeResource SystemAccentColor}"/>
+                <TextBlock Text="ClipVault" VerticalAlignment="Center" FontWeight="SemiBold"/>
+            </StackPanel>
         </Grid>
 
         <NavigationView x:Name="NavView" 
@@ -23,7 +24,6 @@
                         PaneDisplayMode="LeftCompact"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="True"
-                        Loaded="NavView_Loaded"
                         SelectionChanged="NavView_SelectionChanged">
             
             <NavigationView.MenuItems>
@@ -35,7 +35,7 @@
                 <NavigationViewItem Content="Pinned" Tag="PinnedPage">
                      <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Pin"/>
-                    </NavigationViewItem.Icon>
+                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 

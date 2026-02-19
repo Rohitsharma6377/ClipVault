@@ -22,10 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-
-  </ItemGroup>
-
-  <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 </Project>

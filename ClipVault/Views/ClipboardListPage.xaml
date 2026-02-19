@@ -4,16 +4,39 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:u="using:ClipVault.Models"
     xmlns:vm="using:ClipVault.ViewModels"
-    x:Name="PageRoot">
+    xmlns:helpers="using:ClipVault.Helpers">
+
+    <Page.Resources>
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="16,12,16,4">
+            <TextBlock x:Name="HeaderTitle" 
+                       Text="Clipboard History" 
+                       Style="{StaticResource SubtitleTextBlockStyle}" 
+                       VerticalAlignment="Center"/>
+            
+            <Button Command="{x:Bind ViewModel.ClearAllCommand}" 
+                    Content="Clear All" 
+                    HorizontalAlignment="Right" 
+                    Style="{StaticResource AccentButtonStyle}"
+                    CornerRadius="8" />
+        </Grid>
+
         <!-- Background Layer -->
-        <!-- Using ThemeResource for safety but opacity for glass feel -->
-        <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="12" Margin="8" Opacity="0.5"/>
+        <Border Grid.Row="1" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="12" Margin="8,0,8,8" Opacity="0.5"/>
         
-        <ListView ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
+        <ListView Grid.Row="1" 
+                  ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
                   SelectionMode="None"
-                  Padding="16"
+                  Padding="16,8,16,16"
                   IsItemClickEnabled="False">
             
             <ListView.ItemContainerTransitions>
@@ -66,17 +89,17 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0,0,0">
                             <!-- Copy -->
-                            <Button Click="CopyButton_Click" ToolTipService.ToolTip="Copy" Style="{StaticResource GradientIconButtonStyle}">
+                            <Button Click="CopyButton_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Copy" Background="Transparent" BorderThickness="0">
                                 <SymbolIcon Symbol="Copy" />
                             </Button>
                             
                             <!-- Toggle Pin -->
-                            <ToggleButton Click="PinButton_Click" IsChecked="{x:Bind IsPinned, Mode=OneWay}" ToolTipService.ToolTip="Pin" Style="{StaticResource GradientIconToggleButtonStyle}">
+                            <ToggleButton Click="PinButton_Click" Tag="{x:Bind}" IsChecked="{x:Bind IsPinned, Mode=OneWay}" ToolTipService.ToolTip="Pin" Background="Transparent" BorderThickness="0">
                                 <SymbolIcon Symbol="Pin" />
                             </ToggleButton>
                             
                             <!-- Delete -->
-                            <Button Click="DeleteButton_Click" ToolTipService.ToolTip="Delete" Style="{StaticResource GradientIconButtonStyle}">
+                            <Button Click="DeleteButton_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete" Background="Transparent" BorderThickness="0">
                                 <SymbolIcon Symbol="Delete" Foreground="Red"/>
                             </Button>
                         </StackPanel>
@@ -85,7 +108,7 @@
             </ListView.ItemTemplate>
         </ListView>
         
-        <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" 
+        <ProgressRing Grid.Row="0" Grid.RowSpan="2" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" 
                       HorizontalAlignment="Center" VerticalAlignment="Center" 
                       Width="40" Height="40" />
     </Grid>

@@ -20,10 +20,10 @@ namespace ClipVault.Helpers
             throw new NotImplementedException();
         }
     }
-    
+
     public class BooleanToInvertConverter : IValueConverter
     {
-         public object Convert(object value, Type targetType, object parameter, string language)
+        public object Convert(object value, Type targetType, object parameter, string language)
         {
             if (value is bool b)
             {
@@ -34,11 +34,27 @@ namespace ClipVault.Helpers
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-             if (value is bool b)
+            if (value is bool b)
             {
                 return !b;
             }
             return false;
+        }
+    }
+    public class BooleanToTitleConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool b && b)
+            {
+                return "Pinned Clips";
+            }
+            return "Clipboard History";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
         }
     }
 }

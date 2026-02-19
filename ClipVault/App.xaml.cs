@@ -23,6 +23,7 @@ namespace ClipVault
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            ElementSoundPlayer.State = ElementSoundPlayerState.On;
             m_window = new MainWindow();
             m_window.Activate();
         }

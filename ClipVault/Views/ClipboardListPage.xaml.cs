@@ -12,9 +12,8 @@ namespace ClipVault.Views
 
         public ClipboardListPage()
         {
-            this.InitializeComponent();
             ViewModel = App.MainViewModel;
-            this.DataContext = ViewModel;
+            this.InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -24,13 +23,14 @@ namespace ClipVault.Views
             if (e.Parameter is string param && param == "Pinned")
             {
                 ViewModel.IsPinnedFilter = true;
+                HeaderTitle.Text = "Pinned Clips";
             }
             else
             {
                 ViewModel.IsPinnedFilter = false;
+                HeaderTitle.Text = "Clipboard History";
             }
 
-            // Reload with new filter asynchronously
             ViewModel.LoadItemsAsync(true);
         }
 
