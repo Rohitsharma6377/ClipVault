@@ -27,7 +27,7 @@ namespace ClipVault.ViewModels
         private bool _isPremium;
 
         [ObservableProperty]
-        private bool _isPinnedFilter;
+        private bool _isPinnedFilter; // If true, only show pinned
 
         [ObservableProperty]
         private bool _isBusy;
@@ -84,7 +84,6 @@ namespace ClipVault.ViewModels
 
         private async void OnClipboardChanged(object sender, string text)
         {
-            // Check if we already have this as most recent to avoid loops
             if (Items.Count > 0 && Items[0].Content == text) return;
 
             _dispatcherQueue.TryEnqueue(() =>
@@ -116,7 +115,7 @@ namespace ClipVault.ViewModels
             bool newPinState = !item.IsPinned;
             _databaseService.TogglePin(item.Id, newPinState);
 
-            // Refresh list to update sorting
+            // Refresh list
             RefreshItems();
         }
 
@@ -131,21 +130,7 @@ namespace ClipVault.ViewModels
         [RelayCommand]
         private void Search()
         {
-            if (string.IsNullOrWhiteSpace(SearchText))
-            {
-                LoadItems();
-                return;
-            }
-
-            var filtered = _databaseService.GetItems(IsPremium) // Fetch all (or limited)
-                .Where(x => x.Content.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            Items.Clear();
-            foreach (var item in filtered)
-            {
-                Items.Add(item);
-            }
+            LoadItems();
         }
 
         [RelayCommand]

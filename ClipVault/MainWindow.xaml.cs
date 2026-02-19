@@ -16,13 +16,13 @@ namespace ClipVault
             // Enable Mica Backdrop
             if (MicaController.IsSupported())
             {
-               this.SystemBackdrop = new MicaBackdrop();
+                this.SystemBackdrop = new MicaBackdrop();
             }
             else if (DesktopAcrylicController.IsSupported())
             {
                 this.SystemBackdrop = new DesktopAcrylicBackdrop();
             }
-            
+
             this.ExtendsContentIntoTitleBar = true;
             this.SetTitleBar(null); // Simple extension
         }
@@ -48,7 +48,7 @@ namespace ClipVault
 
         private void Navigate(string tag)
         {
-             switch (tag)
+            switch (tag)
             {
                 case "ClipboardListPage":
                     ContentFrame.Navigate(typeof(Views.ClipboardListPage));
@@ -63,7 +63,7 @@ namespace ClipVault
                     ContentFrame.Navigate(typeof(Views.ClipboardListPage), "Pinned");
                     break;
                 case "PremiumPage":
-                    ContentFrame.Navigate(typeof(Views.PremiumPage));
+                    // ContentFrame.Navigate(typeof(Views.PremiumPage));
                     break;
                 case "SettingsPage":
                     ContentFrame.Navigate(typeof(Views.SettingsPage));

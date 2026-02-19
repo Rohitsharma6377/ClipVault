@@ -10,6 +10,13 @@
         <ListView ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
                   SelectionMode="None"
                   Padding="12">
+            <ListView.ItemContainerTransitions>
+                <TransitionCollection>
+                    <AddDeleteThemeTransition />
+                    <ContentThemeTransition />
+                    <ReorderThemeTransition />
+                </TransitionCollection>
+            </ListView.ItemContainerTransitions>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="u:ClipboardItem">
                     <Grid Padding="12" Margin="0,4,0,4" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
@@ -27,10 +34,16 @@
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Button Content="Copy" Command="{Binding ElementName=PageRoot, Path=ViewModel.CopyItemCommand}" CommandParameter="{x:Bind}" />
-                            <ToggleButton IsChecked="{x:Bind IsPinned, Mode=OneWay}" Content="Pin" Command="{Binding ElementName=PageRoot, Path=ViewModel.TogglePinCommand}" CommandParameter="{x:Bind}" />
-                            <Button Content="Delete" Command="{Binding ElementName=PageRoot, Path=ViewModel.DeleteItemCommand}" CommandParameter="{x:Bind}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <Button ToolTipService.ToolTip="Copy">
+                                <SymbolIcon Symbol="Copy" />
+                            </Button>
+                            <ToggleButton IsChecked="{x:Bind IsPinned, Mode=OneWay}" ToolTipService.ToolTip="Pin">
+                                <SymbolIcon Symbol="Pin" />
+                            </ToggleButton>
+                            <Button ToolTipService.ToolTip="Delete">
+                                <SymbolIcon Symbol="Delete" />
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

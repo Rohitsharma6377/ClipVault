@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using ClipVault.ViewModels;
 
 namespace ClipVault.Views
@@ -12,6 +13,23 @@ namespace ClipVault.Views
             this.InitializeComponent();
             ViewModel = App.MainViewModel;
             this.DataContext = ViewModel;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            if (e.Parameter is string param && param == "Pinned")
+            {
+                ViewModel.IsPinnedFilter = true;
+            }
+            else
+            {
+                ViewModel.IsPinnedFilter = false;
+            }
+
+            // Reload with new filter
+            ViewModel.LoadItems();
         }
     }
 }
