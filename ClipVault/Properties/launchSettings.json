@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClipVault": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

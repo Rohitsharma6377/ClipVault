@@ -1,0 +1,44 @@
+<Page
+    x:Class="ClipVault.Views.ClipboardListPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:u="using:ClipVault.Models"
+    xmlns:vm="using:ClipVault.ViewModels"
+    x:Name="PageRoot">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <ListView ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
+                  SelectionMode="None"
+                  Padding="12">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="u:ClipboardItem">
+                    <Grid Padding="12" Margin="0,4,0,4" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Content}" 
+                                       Style="{StaticResource BodyStrongTextBlockStyle}"
+                                       MaxLines="2" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{x:Bind TimestampDisplay}" 
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button Content="Copy" Command="{Binding ElementName=PageRoot, Path=ViewModel.CopyItemCommand}" CommandParameter="{x:Bind}" />
+                            <ToggleButton IsChecked="{x:Bind IsPinned, Mode=OneWay}" Content="Pin" Command="{Binding ElementName=PageRoot, Path=ViewModel.TogglePinCommand}" CommandParameter="{x:Bind}" />
+                            <Button Content="Delete" Command="{Binding ElementName=PageRoot, Path=ViewModel.DeleteItemCommand}" CommandParameter="{x:Bind}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" 
+                      HorizontalAlignment="Center" VerticalAlignment="Center" 
+                      Width="40" Height="40"/>
+    </Grid>
+</Page>

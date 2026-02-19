@@ -1,0 +1,17 @@
+<Page
+    x:Class="ClipVault.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <StackPanel Spacing="10" Padding="12">
+            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock Text="ClipVault Version 1.0" Style="{StaticResource BodyTextBlockStyle}" />
+            <ToggleSwitch Header="Start with Windows" IsOn="True" IsEnabled="True" />
+            <TextBlock Text="More settings coming soon..." Style="{StaticResource CaptionTextBlockStyle}" />
+        </StackPanel>
+    </Grid>
+</Page>
