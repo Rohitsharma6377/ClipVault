@@ -1,27 +1,35 @@
+using System;
+using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
 using ClipVault.ViewModels;
-using System;
-using System.IO;
 
 namespace ClipVault
 {
-    public partial class App : Application
+    public sealed partial class App : Application
     {
-        public static MainViewModel MainViewModel { get; private set; }
-        public static Window MainWindow { get; private set; }
-
         public App()
         {
             this.InitializeComponent();
-            MainViewModel = new MainViewModel();
+            this.UnhandledException += App_UnhandledException;
+        }
+
+        private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            // Log the error
+            Debug.WriteLine($"Unhandled exception: {e.Message}");
+
+            // Prevent crash if possible
+            e.Handled = true;
         }
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            MainWindow = new MainWindow();
-            MainWindow.Activate();
+            m_window = new MainWindow();
+            m_window.Activate();
         }
+
+        private Window m_window;
+        public static MainViewModel MainViewModel { get; } = new MainViewModel(); // Keep static reference safe
     }
 }

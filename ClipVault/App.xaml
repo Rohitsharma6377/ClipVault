@@ -9,7 +9,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-                <!-- Other merged dictionaries here -->
+                <ResourceDictionary Source="ms-appx:///Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
             <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

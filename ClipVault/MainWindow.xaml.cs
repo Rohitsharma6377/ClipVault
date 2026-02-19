@@ -1,9 +1,9 @@
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using System.Runtime.InteropServices; // For P/Invoke if needed
-using WinRT; // For WindowId
+using Microsoft.UI.Windowing; // For AppWindow
+using System.Runtime.InteropServices;
+using WinRT;
 
 namespace ClipVault
 {
@@ -14,22 +14,57 @@ namespace ClipVault
             this.InitializeComponent();
 
             // Enable Mica Backdrop
-            if (MicaController.IsSupported())
+            try
             {
-                this.SystemBackdrop = new MicaBackdrop();
+                if (MicaController.IsSupported())
+                {
+                    this.SystemBackdrop = new MicaBackdrop();
+                }
+                else if (DesktopAcrylicController.IsSupported())
+                {
+                    this.SystemBackdrop = new DesktopAcrylicBackdrop();
+                }
             }
-            else if (DesktopAcrylicController.IsSupported())
-            {
-                this.SystemBackdrop = new DesktopAcrylicBackdrop();
-            }
+            catch { /* Fail gracefully on older OS */ }
 
             this.ExtendsContentIntoTitleBar = true;
-            this.SetTitleBar(null); // Simple extension
+            this.SetTitleBar(null);
+
+            this.Activated += MainWindow_Activated;
+        }
+
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+        {
+            // Set Size only once on first activation to avoid resizing loops or issues
+            // But simple Resize call is usually safe.
+            // Let's ensure we are on UI thread.
+
+            // Simple check if already sized? We can't easily. 
+            // Just resize on constructor or first activation is fine.
+            // Moving to constructor was causing issues? Maybe. 
+            // Let's try to set size here safely.
+
+            try
+            {
+                var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(WinRT.Interop.WindowNative.GetWindowHandle(this));
+                var appWindow = AppWindow.GetFromWindowId(windowId);
+                if (appWindow != null)
+                {
+                    // Check current size to avoid jitter
+                    if (appWindow.Size.Width != 450 || appWindow.Size.Height != 700)
+                    {
+                        appWindow.Resize(new Windows.Graphics.SizeInt32(450, 700)); // Compact size
+                    }
+                }
+            }
+            catch { }
+
+            // Unsubscribe to avoid repeated resizing
+            this.Activated -= MainWindow_Activated;
         }
 
         private void NavView_Loaded(object sender, RoutedEventArgs e)
         {
-            // Set initial page
             NavView.SelectedItem = NavView.MenuItems[0];
             Navigate("ClipboardListPage");
         }
@@ -54,16 +89,7 @@ namespace ClipVault
                     ContentFrame.Navigate(typeof(Views.ClipboardListPage));
                     break;
                 case "PinnedPage":
-                    // In a real app, maybe filter ItemsSource or pass parameter
-                    // For now reuse same page but we'd need to tell VM to filter
-                    // Or maintain separate view logic. 
-                    // Let's just navigate to ClipboardListPage. VM handles filtering via search or we add filter property.
-                    // For simplicity in this demo, PinnedPage just shows all but user can toggle pin filter.
-                    // I'll create a PinnedItemsPage if needed, but reusing is better if I can pass parameter.
                     ContentFrame.Navigate(typeof(Views.ClipboardListPage), "Pinned");
-                    break;
-                case "PremiumPage":
-                    // ContentFrame.Navigate(typeof(Views.PremiumPage));
                     break;
                 case "SettingsPage":
                     ContentFrame.Navigate(typeof(Views.SettingsPage));

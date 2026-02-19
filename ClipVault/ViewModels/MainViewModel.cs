@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,49 +33,61 @@ namespace ClipVault.ViewModels
         [ObservableProperty]
         private bool _isBusy;
 
+        // Use this flag to stop listening temporarily if needed
+        private bool _handleUpdates = true;
+
         public MainViewModel()
         {
-            // Simplified constructor for demo. Proper DI would be better.
             _clipboardService = new ClipboardService();
             _databaseService = new DatabaseService();
             _storeService = new StoreService();
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             Items = new ObservableCollection<ClipboardItem>();
-            LoadItems();
+            LoadItemsAsync(); // Fire and forget (it handles failures)
 
             _clipboardService.ClipboardChanged += OnClipboardChanged;
             _storeService.PremiumStatusChanged += (s, isPremium) => IsPremium = isPremium;
 
-            // Initial load check
             IsPremium = _storeService.IsPremium;
         }
 
-        public void LoadItems()
+        public async void LoadItemsAsync(bool forceReload = false)
         {
+            if (IsBusy && !forceReload) return;
+
             IsBusy = true;
             try
             {
-                // In a real app, pass filters to DB to be efficient
-                var allItems = _databaseService.GetItems(IsPremium);
-
-                var filtered = allItems;
-
-                if (IsPinnedFilter)
+                // Run DB query on background thread
+                var loadedItems = await Task.Run(() =>
                 {
-                    filtered = filtered.Where(x => x.IsPinned).ToList();
-                }
+                    var allItems = _databaseService.GetItems(IsPremium);
+                    var filtered = allItems;
 
-                if (!string.IsNullOrWhiteSpace(SearchText))
-                {
-                    filtered = filtered.Where(x => x.Content.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase)).ToList();
-                }
+                    if (IsPinnedFilter)
+                    {
+                        filtered = filtered.Where(x => x.IsPinned).ToList();
+                    }
 
+                    if (!string.IsNullOrWhiteSpace(SearchText))
+                    {
+                        filtered = filtered.Where(x => x.Content.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+                    }
+
+                    return filtered;
+                });
+
+                // Update UI thread
                 Items.Clear();
-                foreach (var item in filtered)
+                foreach (var item in loadedItems)
                 {
                     Items.Add(item);
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading items: {ex.Message}");
             }
             finally
             {
@@ -82,28 +95,53 @@ namespace ClipVault.ViewModels
             }
         }
 
-        private async void OnClipboardChanged(object sender, string text)
+        private void OnClipboardChanged(object sender, string text)
         {
+            if (!_handleUpdates) return;
+
+            // Avoid loops - check most recent
             if (Items.Count > 0 && Items[0].Content == text) return;
 
-            _dispatcherQueue.TryEnqueue(() =>
-           {
-               _databaseService.AddItem(text);
-               RefreshItemsCommand.Execute(null);
-           });
+            // Run logic on background thread then post to UI
+            Task.Run(() =>
+            {
+                _databaseService.AddItem(text); // Add to DB
+
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    // Only reload if we are not filtering/searching
+                    // or if the new item matches current filter
+                    if (string.IsNullOrEmpty(SearchText) && !IsPinnedFilter)
+                    {
+                        // Optimization: Instead of reloading everything, just validly insert at top
+                        // But getting ID is tricky without reloading unless AddItem returns ID.
+                        // For simplicity and correctness, reload list but quickly.
+                        LoadItemsAsync(true);
+                    }
+                });
+            });
         }
 
         [RelayCommand]
         private void RefreshItems()
         {
-            LoadItems();
+            LoadItemsAsync(true);
         }
 
         [RelayCommand]
         private void CopyItem(ClipboardItem item)
         {
             if (item == null) return;
-            _clipboardService.SetContent(item.Content);
+            _handleUpdates = false; // Don't trigger recursive loop
+            try
+            {
+                _clipboardService.SetContent(item.Content);
+            }
+            finally
+            {
+                // Re-enable after short delay to skip own event
+                Task.Delay(500).ContinueWith(_ => _handleUpdates = true);
+            }
         }
 
         [RelayCommand]
@@ -111,26 +149,33 @@ namespace ClipVault.ViewModels
         {
             if (item == null) return;
 
-            // Toggle
+            // Toggle local object state for immediate feedback
             bool newPinState = !item.IsPinned;
-            _databaseService.TogglePin(item.Id, newPinState);
+            item.IsPinned = newPinState; // UI updates via INotifyPropertyChanged
 
-            // Refresh list
-            RefreshItems();
+            // Update DB
+            Task.Run(() => _databaseService.TogglePin(item.Id, newPinState));
+
+            // If we are showing only Pinned items, we might want to remove it from view if unpinned
+            if (IsPinnedFilter && !newPinState)
+            {
+                Items.Remove(item);
+            }
         }
 
         [RelayCommand]
         private void DeleteItem(ClipboardItem item)
         {
             if (item == null) return;
-            _databaseService.DeleteItem(item.Id);
+
+            Task.Run(() => _databaseService.DeleteItem(item.Id));
             Items.Remove(item);
         }
 
         [RelayCommand]
         private void Search()
         {
-            LoadItems();
+            LoadItemsAsync(true);
         }
 
         [RelayCommand]

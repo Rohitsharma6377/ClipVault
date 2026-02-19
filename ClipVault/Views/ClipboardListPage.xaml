@@ -6,10 +6,15 @@
     xmlns:vm="using:ClipVault.ViewModels"
     x:Name="PageRoot">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid>
+        <!-- Background Layer -->
+        <Border Background="{StaticResource GlassCardBackgroundBrush}" CornerRadius="12" Margin="8"/>
+        
         <ListView ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
                   SelectionMode="None"
-                  Padding="12">
+                  Padding="16"
+                  IsItemClickEnabled="False">
+            
             <ListView.ItemContainerTransitions>
                 <TransitionCollection>
                     <AddDeleteThemeTransition />
@@ -17,41 +22,77 @@
                     <ReorderThemeTransition />
                 </TransitionCollection>
             </ListView.ItemContainerTransitions>
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0,4,0,4" />
+                </Style>
+            </ListView.ItemContainerStyle>
+
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="u:ClipboardItem">
-                    <Grid Padding="12" Margin="0,4,0,4" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid CornerRadius="12" 
+                          Padding="12" 
+                          BorderThickness="1"
+                          BorderBrush="#11FFFFFF"
+                          Background="#22FFFFFF">
+                        
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-
+                        
                         <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Content}" 
-                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                       MaxLines="2" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{x:Bind TimestampDisplay}" 
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock Text="{x:Bind Preview}" 
+                                       FontWeight="Medium"
+                                       FontSize="14"
+                                       MaxLines="2" 
+                                       TextTrimming="CharacterEllipsis" 
+                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                            
+                            <StackPanel Orientation="Horizontal" Spacing="8" Opacity="0.7">
+                                <TextBlock Text="{x:Bind TimestampDisplay}" 
+                                           FontSize="11" 
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                
+                                <!-- Indicator -->
+                                <FontIcon Glyph="&#xE735;" FontFamily="Segoe MDL2 Assets" FontSize="12" 
+                                          Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                          Foreground="#00C9A7"/>
+                            </StackPanel>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <Button ToolTipService.ToolTip="Copy">
-                                <SymbolIcon Symbol="Copy" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <!-- Copy -->
+                            <Button Click="CopyButton_Click" Tag="{x:Bind}"
+                                    Style="{StaticResource GradientIconButtonStyle}"
+                                    ToolTipService.ToolTip="Copy">
+                                <FontIcon Glyph="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                             </Button>
-                            <ToggleButton IsChecked="{x:Bind IsPinned, Mode=OneWay}" ToolTipService.ToolTip="Pin">
-                                <SymbolIcon Symbol="Pin" />
+                            
+                            <!-- Toggle Pin -->
+                            <ToggleButton Click="PinButton_Click" Tag="{x:Bind}" IsChecked="{x:Bind IsPinned, Mode=OneWay}"
+                                          Style="{StaticResource GradientIconButtonStyle}"
+                                          ToolTipService.ToolTip="Pin">
+                                <FontIcon Glyph="&#xE718;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                             </ToggleButton>
-                            <Button ToolTipService.ToolTip="Delete">
-                                <SymbolIcon Symbol="Delete" />
+                            
+                            <!-- Delete -->
+                            <Button Click="DeleteButton_Click" Tag="{x:Bind}"
+                                    Style="{StaticResource GradientIconButtonStyle}"
+                                    ToolTipService.ToolTip="Delete">
+                                <FontIcon Glyph="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#FF5555"/>
                             </Button>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-
+        
         <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" 
                       HorizontalAlignment="Center" VerticalAlignment="Center" 
-                      Width="40" Height="40"/>
+                      Width="40" Height="40" Foreground="#00C9A7"/>
     </Grid>
 </Page>
