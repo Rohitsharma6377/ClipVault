@@ -1,8 +1,8 @@
-using Microsoft.UI.Composition.SystemBackdrops;
+using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Windowing; // For AppWindow
-using System.Runtime.InteropServices;
+using Microsoft.UI.Xaml.Media; // Required for MicaBackdrop
+using Microsoft.UI.Windowing;
 using WinRT;
 
 namespace ClipVault
@@ -13,58 +13,40 @@ namespace ClipVault
         {
             this.InitializeComponent();
 
-            // Enable Mica Backdrop
-            try
-            {
-                if (MicaController.IsSupported())
-                {
-                    this.SystemBackdrop = new MicaBackdrop();
-                }
-                else if (DesktopAcrylicController.IsSupported())
-                {
-                    this.SystemBackdrop = new DesktopAcrylicBackdrop();
-                }
-            }
-            catch { /* Fail gracefully on older OS */ }
-
+            // Set Title and TitleBar
+            this.Title = "ClipVault";
             this.ExtendsContentIntoTitleBar = true;
             this.SetTitleBar(null);
+
+            // Set Backdrop (Glass Effect)
+            // Windows App SDK 1.3+ supports this simple API
+            try
+            {
+                this.SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.BaseAlt };
+            }
+            catch (Exception ex)
+            {
+                // Fallback or log if on older OS (though SDK 1.6 should handle it gracefully or ignore)
+                System.Diagnostics.Debug.WriteLine($"Backdrop failed: {ex.Message}");
+                // Try Acrylic if Mica fails?
+                try { this.SystemBackdrop = new DesktopAcrylicBackdrop(); } catch { }
+            }
+
+            // Set Window Size
+            this.AppWindow.Resize(new Windows.Graphics.SizeInt32(450, 700));
 
             this.Activated += MainWindow_Activated;
         }
 
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {
-            // Set Size only once on first activation to avoid resizing loops or issues
-            // But simple Resize call is usually safe.
-            // Let's ensure we are on UI thread.
-
-            // Simple check if already sized? We can't easily. 
-            // Just resize on constructor or first activation is fine.
-            // Moving to constructor was causing issues? Maybe. 
-            // Let's try to set size here safely.
-
-            try
-            {
-                var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(WinRT.Interop.WindowNative.GetWindowHandle(this));
-                var appWindow = AppWindow.GetFromWindowId(windowId);
-                if (appWindow != null)
-                {
-                    // Check current size to avoid jitter
-                    if (appWindow.Size.Width != 450 || appWindow.Size.Height != 700)
-                    {
-                        appWindow.Resize(new Windows.Graphics.SizeInt32(450, 700)); // Compact size
-                    }
-                }
-            }
-            catch { }
-
-            // Unsubscribe to avoid repeated resizing
+            // Ensure size is enforced if needed, but AppWindow.Resize in constructor is usually enough.
             this.Activated -= MainWindow_Activated;
         }
 
         private void NavView_Loaded(object sender, RoutedEventArgs e)
         {
+            // Navigate to home by default
             NavView.SelectedItem = NavView.MenuItems[0];
             Navigate("ClipboardListPage");
         }
@@ -77,12 +59,14 @@ namespace ClipVault
             }
             else if (args.SelectedItem is NavigationViewItem item)
             {
-                Navigate(item.Tag.ToString());
+                Navigate(item.Tag?.ToString());
             }
         }
 
         private void Navigate(string tag)
         {
+            if (string.IsNullOrEmpty(tag)) return;
+
             switch (tag)
             {
                 case "ClipboardListPage":

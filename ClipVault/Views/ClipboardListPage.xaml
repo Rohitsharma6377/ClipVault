@@ -8,7 +8,8 @@
 
     <Grid>
         <!-- Background Layer -->
-        <Border Background="{StaticResource GlassCardBackgroundBrush}" CornerRadius="12" Margin="8"/>
+        <!-- Using ThemeResource for safety but opacity for glass feel -->
+        <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="12" Margin="8" Opacity="0.5"/>
         
         <ListView ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
                   SelectionMode="None"
@@ -22,11 +23,11 @@
                     <ReorderThemeTransition />
                 </TransitionCollection>
             </ListView.ItemContainerTransitions>
-
+            
             <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
+                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Padding" Value="0,0,0,8" />
                     <Setter Property="Margin" Value="0,4,0,4" />
                 </Style>
             </ListView.ItemContainerStyle>
@@ -37,7 +38,7 @@
                           Padding="12" 
                           BorderThickness="1"
                           BorderBrush="#11FFFFFF"
-                          Background="#22FFFFFF">
+                          Background="{StaticResource GlassCardBackgroundBrush}">
                         
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -57,33 +58,26 @@
                                            FontSize="11" 
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                 
-                                <!-- Indicator -->
                                 <FontIcon Glyph="&#xE735;" FontFamily="Segoe MDL2 Assets" FontSize="12" 
-                                          Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                          Foreground="#00C9A7"/>
+                                          Foreground="{ThemeResource SystemAccentColor}"
+                                          Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0,0,0">
                             <!-- Copy -->
-                            <Button Click="CopyButton_Click" Tag="{x:Bind}"
-                                    Style="{StaticResource GradientIconButtonStyle}"
-                                    ToolTipService.ToolTip="Copy">
-                                <FontIcon Glyph="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                            <Button Click="CopyButton_Click" ToolTipService.ToolTip="Copy" Style="{StaticResource GradientIconButtonStyle}">
+                                <SymbolIcon Symbol="Copy" />
                             </Button>
                             
                             <!-- Toggle Pin -->
-                            <ToggleButton Click="PinButton_Click" Tag="{x:Bind}" IsChecked="{x:Bind IsPinned, Mode=OneWay}"
-                                          Style="{StaticResource GradientIconButtonStyle}"
-                                          ToolTipService.ToolTip="Pin">
-                                <FontIcon Glyph="&#xE718;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                            <ToggleButton Click="PinButton_Click" IsChecked="{x:Bind IsPinned, Mode=OneWay}" ToolTipService.ToolTip="Pin" Style="{StaticResource GradientIconToggleButtonStyle}">
+                                <SymbolIcon Symbol="Pin" />
                             </ToggleButton>
                             
                             <!-- Delete -->
-                            <Button Click="DeleteButton_Click" Tag="{x:Bind}"
-                                    Style="{StaticResource GradientIconButtonStyle}"
-                                    ToolTipService.ToolTip="Delete">
-                                <FontIcon Glyph="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#FF5555"/>
+                            <Button Click="DeleteButton_Click" ToolTipService.ToolTip="Delete" Style="{StaticResource GradientIconButtonStyle}">
+                                <SymbolIcon Symbol="Delete" Foreground="Red"/>
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -93,6 +87,6 @@
         
         <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" 
                       HorizontalAlignment="Center" VerticalAlignment="Center" 
-                      Width="40" Height="40" Foreground="#00C9A7"/>
+                      Width="40" Height="40" />
     </Grid>
 </Page>

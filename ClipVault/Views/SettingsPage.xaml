@@ -8,10 +8,10 @@
 
     <Grid>
         <StackPanel Spacing="10" Padding="12">
-            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
-            <TextBlock Text="ClipVault Version 1.0" Style="{StaticResource BodyTextBlockStyle}" />
+            <TextBlock Text="Settings" FontSize="20" FontWeight="Bold" />
+            <TextBlock Text="ClipVault Version 1.0" />
             <ToggleSwitch Header="Start with Windows" IsOn="True" IsEnabled="True" />
-            <TextBlock Text="More settings coming soon..." Style="{StaticResource CaptionTextBlockStyle}" />
+            <TextBlock Text="More settings coming soon..." FontSize="12" Opacity="0.6" />
         </StackPanel>
     </Grid>
 </Page>
