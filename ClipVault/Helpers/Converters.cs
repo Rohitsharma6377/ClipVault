@@ -41,6 +41,7 @@ namespace ClipVault.Helpers
             return false;
         }
     }
+
     public class BooleanToTitleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
