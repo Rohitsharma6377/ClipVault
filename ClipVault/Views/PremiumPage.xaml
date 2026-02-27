@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:ClipVault.Views"
     mc:Ignorable="d"
     x:Name="PageRoot">
 
@@ -52,14 +53,15 @@
                     <Button Content="Upgrade Now" 
                             Style="{StaticResource AccentButtonStyle}" 
                             HorizontalAlignment="Stretch" Padding="0,12"
-                            Command="{x:Bind ViewModel.UpgradeCommand, Mode=OneWay}"/>
+                            Command="{Binding ViewModel.PurchasePremiumCommand, ElementName=PageRoot}"/>
                 </StackPanel>
             </Grid>
 
             <InfoBar Title="Premium Status" 
-                     Message="{x:Bind ViewModel.IsPremium, Mode=OneWay, Converter={StaticResource PremiumStatusConverter}}"
-                     IsOpen="True" IsClosable="False" 
-                     Severity="Informational"/>
+                     Message="Active"
+                     IsOpen="{Binding ViewModel.IsPremium, ElementName=PageRoot}" 
+                     IsClosable="False" 
+                     Severity="Success"/>
         </StackPanel>
     </Grid>
 </Page>

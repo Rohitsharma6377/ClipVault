@@ -21,11 +21,11 @@
                    Margin="0,0,0,12"/>
 
         <ListView Grid.Row="1"
-                  ItemsSource="{x:Bind ViewModel.ClipboardItems, Mode=OneWay}"
+                  ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
                   SelectionMode="None"
                   Padding="0,0,0,20">
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:ClipboardItem">
+                <DataTemplate>
                     <Grid Padding="12" Margin="0,4" 
                           Background="{ThemeResource LayerFillColorDefaultBrush}"
                           CornerRadius="8"
@@ -37,33 +37,33 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind Content}" 
+                            <TextBlock Text="{Binding Content}" 
                                        MaxLines="2" 
                                        TextWrapping="Wrap" 
                                        TextTrimming="CharacterEllipsis"
                                        Style="{StaticResource BodyTextBlockStyle}"/>
-                            <TextBlock Text="{x:Bind TimestampLabel}" 
+                            <TextBlock Text="{Binding TimestampLabel}" 
                                        Style="{StaticResource CaptionTextBlockStyle}"
                                        Opacity="0.6"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
                             <Button Content="&#xE8C8;" FontFamily="Segoe MDL2 Assets" 
-                                    Command="{Binding ElementName=PageRoot, Path=ViewModel.CopyCommand}"
-                                    CommandParameter="{x:Bind}"
+                                    Command="{Binding ElementName=PageRoot, Path=ViewModel.CopyItemCommand}"
+                                    CommandParameter="{Binding}"
                                     ToolTipService.ToolTip="Copy"
                                     Style="{StaticResource SubtleButtonStyle}"/>
                             
                             <ToggleButton Content="&#xE718;" FontFamily="Segoe MDL2 Assets" 
-                                          IsChecked="{x:Bind IsPinned, Mode=TwoWay}"
+                                          IsChecked="{Binding IsPinned, Mode=TwoWay}"
                                           Command="{Binding ElementName=PageRoot, Path=ViewModel.TogglePinCommand}"
-                                          CommandParameter="{x:Bind}"
+                                          CommandParameter="{Binding}"
                                           ToolTipService.ToolTip="Pin"
                                           Style="{StaticResource SubtleButtonStyle}"/>
 
                             <Button Content="&#xE74D;" FontFamily="Segoe MDL2 Assets" 
-                                    Command="{Binding ElementName=PageRoot, Path=ViewModel.DeleteCommand}"
-                                    CommandParameter="{x:Bind}"
+                                    Command="{Binding ElementName=PageRoot, Path=ViewModel.DeleteItemCommand}"
+                                    CommandParameter="{Binding}"
                                     ToolTipService.ToolTip="Delete"
                                     Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                     Style="{StaticResource SubtleButtonStyle}"/>
@@ -79,7 +79,7 @@
         </ListView>
 
         <ProgressRing Grid.Row="1" 
-                      IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                      IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
                       Width="32" Height="32"/>
     </Grid>
 </Page>

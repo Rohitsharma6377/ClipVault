@@ -56,6 +56,18 @@ namespace ClipVault.ViewModels
             ElementSoundPlayer.State = ElementSoundPlayerState.On;
         }
 
+        public void LoadPinnedItems()
+        {
+            IsPinnedFilter = true;
+            LoadItemsAsync(true);
+        }
+
+        public void LoadAllItems()
+        {
+            IsPinnedFilter = false;
+            LoadItemsAsync(true);
+        }
+
         public async void LoadItemsAsync(bool forceReload = false)
         {
             if (IsBusy && !forceReload) return;

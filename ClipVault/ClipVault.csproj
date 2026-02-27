@@ -8,6 +8,7 @@
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <XamlGeneratedOutputPath>obj\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\</XamlGeneratedOutputPath>
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
