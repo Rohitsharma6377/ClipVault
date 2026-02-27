@@ -1,29 +1,38 @@
 <Window
     x:Class="ClipVault.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid>
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
         <NavigationView x:Name="NavView" 
-                        PaneDisplayMode="LeftCompact"
-                        IsBackButtonVisible="Collapsed"
+                        Grid.Row="1"
+                        SelectionChanged="NavView_SelectionChanged"
                         IsSettingsVisible="True"
-                        SelectionChanged="NavView_SelectionChanged">
+                        PaneDisplayMode="LeftCompact"
+                        Header="ClipVault">
             
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Clipboard" Tag="ClipboardListPage">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Paste"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Pinned" Tag="PinnedPage">
-                     <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Pin"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
+                <NavigationViewItem Content="All Clips" Icon="List" Tag="ClipboardListPage" />
+                <NavigationViewItem Content="Pinned" Icon="OutlineStar" Tag="PinnedPage" />
+                <NavigationViewItem Content="Premium" Icon="Diamond" Tag="PremiumPage" />
             </NavigationView.MenuItems>
 
-            <Frame x:Name="ContentFrame" />
-            
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox x:Name="SearchBox"
+                               QueryIcon="Find" 
+                               PlaceholderText="Search clips..."
+                               TextChanged="AutoSuggestBox_TextChanged" />
+            </NavigationView.AutoSuggestBox>
+
+            <Frame x:Name="ContentFrame" Margin="12,0,12,0"/>
         </NavigationView>
     </Grid>
 </Window>

@@ -1,0 +1,10 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:h="using:ClipVault.Helpers">
+
+    <h:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <h:BooleanToVisibilityInvertedConverter x:Key="BooleanToVisibilityInvertedConverter" />
+    <h:PremiumStatusConverter x:Key="PremiumStatusConverter" />
+
+</ResourceDictionary>

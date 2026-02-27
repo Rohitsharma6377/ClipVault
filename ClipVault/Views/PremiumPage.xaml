@@ -1,0 +1,65 @@
+<Page
+    x:Class="ClipVault.Views.PremiumPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="PageRoot">
+
+    <Grid Padding="24">
+        <StackPanel Spacing="24" MaxWidth="600" HorizontalAlignment="Left">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Go Premium" Style="{StaticResource TitleTextBlockStyle}"/>
+                <TextBlock Text="Unlock advanced features and support development." 
+                           Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7"/>
+            </StackPanel>
+
+            <Grid Background="{ThemeResource LayerFillColorDefaultBrush}" 
+                  Padding="24" CornerRadius="8" BorderThickness="1" 
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                <StackPanel Spacing="20">
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="ClipVault Pro" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <TextBlock Text="Monthly Subscription" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                        </StackPanel>
+                        <TextBlock Text="$1.99/mo" HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                   Style="{StaticResource SubtitleTextBlockStyle}" Foreground="{ThemeResource SystemAccentColor}"/>
+                    </Grid>
+
+                    <MenuFlyoutSeparator/>
+
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemAccentColor}"/>
+                            <TextBlock Text="Unlimited clipboard history (currently limited to 50)"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemAccentColor}"/>
+                            <TextBlock Text="Image and file support"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemAccentColor}"/>
+                            <TextBlock Text="Cloud sync between devices"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemAccentColor}"/>
+                            <TextBlock Text="Custom categories and tags"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button Content="Upgrade Now" 
+                            Style="{StaticResource AccentButtonStyle}" 
+                            HorizontalAlignment="Stretch" Padding="0,12"
+                            Command="{x:Bind ViewModel.UpgradeCommand, Mode=OneWay}"/>
+                </StackPanel>
+            </Grid>
+
+            <InfoBar Title="Premium Status" 
+                     Message="{x:Bind ViewModel.IsPremium, Mode=OneWay, Converter={StaticResource PremiumStatusConverter}}"
+                     IsOpen="True" IsClosable="False" 
+                     Severity="Informational"/>
+        </StackPanel>
+    </Grid>
+</Page>

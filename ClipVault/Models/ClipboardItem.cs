@@ -10,6 +10,8 @@ namespace ClipVault.Models
         
         public int Id { get; set; }
         public string Content { get; set; }
+        public byte[] ImageData { get; set; }
+        public string ItemType { get; set; } // "Text" or "Image"
         public DateTime Timestamp { get; set; }
 
         public bool IsPinned

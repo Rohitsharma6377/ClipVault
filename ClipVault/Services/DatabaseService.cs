@@ -32,7 +32,9 @@ namespace ClipVault.Services
                     @"
                         CREATE TABLE IF NOT EXISTS ClipboardItems (
                             Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            Content TEXT NOT NULL,
+                            Content TEXT,
+                            ImageData BLOB,
+                            ItemType TEXT NOT NULL DEFAULT 'Text',
                             Timestamp TEXT NOT NULL,
                             IsPinned INTEGER DEFAULT 0
                         );
@@ -59,7 +61,7 @@ namespace ClipVault.Services
                     // Always show Pinned first, then newest
                     string limitClause = isPremium ? "" : "LIMIT 50"; // Increase limit a bit for user experience
 
-                    command.CommandText = $"SELECT Id, Content, Timestamp, IsPinned FROM ClipboardItems ORDER BY IsPinned DESC, Timestamp DESC {limitClause}";
+                    command.CommandText = $"SELECT Id, Content, ImageData, ItemType, Timestamp, IsPinned FROM ClipboardItems ORDER BY IsPinned DESC, Timestamp DESC {limitClause}";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -68,9 +70,11 @@ namespace ClipVault.Services
                             items.Add(new ClipboardItem
                             {
                                 Id = reader.GetInt32(0),
-                                Content = reader.GetString(1),
-                                Timestamp = DateTime.Parse(reader.GetString(2)),
-                                IsPinned = reader.GetBoolean(3)
+                                Content = reader.IsDBNull(1) ? null : reader.GetString(1),
+                                ImageData = reader.IsDBNull(2) ? null : (byte[])reader.GetValue(2),
+                                ItemType = reader.GetString(3),
+                                Timestamp = DateTime.Parse(reader.GetString(4)),
+                                IsPinned = reader.GetBoolean(5)
                             });
                         }
                     }
@@ -83,7 +87,7 @@ namespace ClipVault.Services
             return items;
         }
 
-        public void AddItem(string content)
+        public void AddItem(string content, byte[] imageData = null, string type = "Text")
         {
             try
             {
@@ -91,20 +95,24 @@ namespace ClipVault.Services
                 {
                     connection.Open();
 
-                    // Check for duplicate recent content
-                    var checkCmd = connection.CreateCommand();
-                    checkCmd.CommandText = "SELECT Content FROM ClipboardItems WHERE Content = $content ORDER BY Timestamp DESC LIMIT 1";
-                    checkCmd.Parameters.AddWithValue("$content", content);
-                    var existing = checkCmd.ExecuteScalar() as string;
-                    if (existing == content) return;
+                    if (type == "Text" && !string.IsNullOrEmpty(content))
+                    {
+                        var checkCmd = connection.CreateCommand();
+                        checkCmd.CommandText = "SELECT Content FROM ClipboardItems WHERE Content = $content AND ItemType = 'Text' ORDER BY Timestamp DESC LIMIT 1";
+                        checkCmd.Parameters.AddWithValue("$content", content);
+                        var existing = checkCmd.ExecuteScalar() as string;
+                        if (existing == content) return;
+                    }
 
                     var command = connection.CreateCommand();
                     command.CommandText =
                     @"
-                        INSERT INTO ClipboardItems (Content, Timestamp, IsPinned)
-                        VALUES ($content, $timestamp, 0)
+                        INSERT INTO ClipboardItems (Content, ImageData, ItemType, Timestamp, IsPinned)
+                        VALUES ($content, $imageData, $type, $timestamp, 0)
                     ";
-                    command.Parameters.AddWithValue("$content", content);
+                    command.Parameters.AddWithValue("$content", content ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("$imageData", imageData ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("$type", type);
                     command.Parameters.AddWithValue("$timestamp", DateTime.Now.ToString("o"));
                     command.ExecuteNonQuery();
                 }

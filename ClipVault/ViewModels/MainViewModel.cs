@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml; // For ElementSoundPlayer
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace ClipVault.ViewModels
 {
@@ -47,6 +48,7 @@ namespace ClipVault.ViewModels
             LoadItemsAsync();
 
             _clipboardService.ClipboardChanged += OnClipboardChanged;
+            _clipboardService.ImageChanged += OnImageChanged;
             _storeService.PremiumStatusChanged += (s, isPremium) => IsPremium = isPremium;
             IsPremium = _storeService.IsPremium;
 
@@ -113,6 +115,23 @@ namespace ClipVault.ViewModels
             });
         }
 
+        private void OnImageChanged(object sender, byte[] bytes)
+        {
+            if (!_handleUpdates) return;
+            
+            Task.Run(() =>
+            {
+                _databaseService.AddItem(null, bytes, "Image");
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    if (string.IsNullOrEmpty(SearchText) && !IsPinnedFilter)
+                    {
+                        LoadItemsAsync(true);
+                    }
+                });
+            });
+        }
+
         [RelayCommand]
         private void RefreshItems()
         {
@@ -126,7 +145,21 @@ namespace ClipVault.ViewModels
             _handleUpdates = false;
             try
             {
-                _clipboardService.SetContent(item.Content);
+                if (item.ItemType == "Image" && item.ImageData != null)
+                {
+                    // For images, we need to set the content using Windows.ApplicationModel.DataTransfer.DataPackage
+                    var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                    // We need to convert byte[] to RandomAccessStream
+                    var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream();
+                    stream.WriteAsync(item.ImageData.AsBuffer()).AsTask().Wait();
+                    stream.Seek(0);
+                    package.SetBitmap(Windows.Storage.Streams.RandomAccessStreamReference.CreateFromStream(stream));
+                    Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+                }
+                else if (item.ItemType == "Text" && !string.IsNullOrEmpty(item.Content))
+                {
+                    _clipboardService.SetContent(item.Content);
+                }
                 PlaySound(ElementSoundKind.Invoke);
             }
             finally
